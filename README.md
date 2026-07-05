@@ -1,40 +1,65 @@
+<div align="center">
+
+<img src="./assets/logo.svg" alt="Stash Management" width="120" />
+
 # Stash Management — MCP connector
 
-Connect your [Stash Management](https://www.stashmanagement.com) comic-book
-inventory to any AI assistant that speaks the [Model Context
-Protocol](https://modelcontextprotocol.io). Ask about your collection, look up
-values and key issues, and — with your permission — add or update items, all in
-plain English from **ChatGPT, Claude, Cursor, or any MCP-compatible client**.
+**Catalog comics at the speed of a scan** — now bring your collection into your AI assistant.
 
-## The server
+[![Start cataloging free](https://img.shields.io/badge/Start_cataloging-free-EA580C?style=for-the-badge)](https://www.stashmanagement.com/login?intent=signup)
+[![Website](https://img.shields.io/badge/stashmanagement.com-111111?style=for-the-badge)](https://www.stashmanagement.com)
+[![Protocol: MCP](https://img.shields.io/badge/protocol-MCP-6E56CF?style=for-the-badge)](https://modelcontextprotocol.io)
 
-| | |
-|---|---|
-| **MCP endpoint** | `https://www.stashmanagement.com/api/mcp` |
-| **Transport** | Streamable HTTP |
-| **Auth** | OAuth 2.0 — authorization code + PKCE (browser), or RFC 8628 device code (headless) |
-| **Discovery** | `/.well-known/oauth-protected-resource` · `/.well-known/oauth-authorization-server` |
+</div>
 
-You authorize once in your browser and pick which workspace the assistant may
-access. Access is **read-only by default**; the write tools require explicitly
-granting the `inventory:write` / `actions:trigger` scopes at the consent screen.
-Revoke any connection anytime at
-<https://www.stashmanagement.com/settings/connections>.
+---
 
-## Connect from your AI app
+## 1 · New here? Get a Stash account first
 
-Most clients only need the endpoint URL — they run the OAuth flow for you.
+[**Stash Management**](https://www.stashmanagement.com) is comic-book inventory software for **collectors and dealers**. Point your camera at a book and Stash identifies it, returns its current market value, tells you whether to **slab, press, clean, or list** it — and can list it across **twelve marketplaces** including eBay and Whatnot. From your phone, in seconds.
 
-### ChatGPT
-Add a custom connector with the URL
-`https://www.stashmanagement.com/api/mcp`, then click Connect and authorize.
+This connector is how you bring that collection into any AI assistant. So step one is an account — **it's free to start**:
 
-### Claude (Desktop / claude.ai)
-Add a custom connector with the same URL, or grab the one-click installer
-(`.mcpb`) from <https://www.stashmanagement.com/connect>.
+### 👉 [Create your free account →](https://www.stashmanagement.com/login?intent=signup)
 
-### Cursor · VS Code · Windsurf · Cline · other MCP clients
-Add the server to your MCP config (e.g. `mcp.json` or the app's MCP settings):
+> AI assistant access is included on paid plans (**Collector** and up). Free accounts can install the connector to try it, but tool calls return an upgrade prompt. See [pricing](https://www.stashmanagement.com/pricing).
+
+Already have an account? Skip to [**Connect your AI app**](#3--connect-your-ai-app).
+
+## 2 · What you can do from your AI assistant
+
+Once connected, just talk to your collection in plain English:
+
+- 🔎 **Find any book** — "Do I own Amazing Spider-Man #300, and what's it worth?"
+- 📈 **Know your numbers** — "What's my total collection value and profit this year?"
+- 🗝️ **Surface your keys** — "List my major keys, most valuable first."
+- 🏷️ **Break it down** — "Which publisher dominates my collection?"
+- ✍️ **Keep it current** *(with write access)* — "Add this CGC 9.8 I just bought" or "Mark ASM #129 sold for $2,100."
+
+It's your live Stash data — the same inventory, values, and keys you see on [the web app](https://www.stashmanagement.com), answered conversationally.
+
+## 3 · Connect your AI app
+
+Most clients only need the endpoint URL — they run the sign-in flow for you. You authorize once in your browser, pick which workspace the assistant may see, and you're connected. Access is **read-only by default**.
+
+**MCP endpoint:** `https://www.stashmanagement.com/api/mcp`
+
+<details open>
+<summary><b>ChatGPT</b></summary>
+
+Add a custom connector with the URL `https://www.stashmanagement.com/api/mcp`, click **Connect**, and authorize.
+</details>
+
+<details>
+<summary><b>Claude (Desktop / claude.ai)</b></summary>
+
+Add a custom connector with the same URL — or grab the one-click installer (`.mcpb`) from [stashmanagement.com/connect](https://www.stashmanagement.com/connect).
+</details>
+
+<details>
+<summary><b>Cursor · VS Code · Windsurf · Cline · other MCP clients</b></summary>
+
+Add the server to your MCP config (see [`examples/mcp.json`](./examples/mcp.json)):
 
 ```json
 {
@@ -46,28 +71,38 @@ Add the server to your MCP config (e.g. `mcp.json` or the app's MCP settings):
   }
 }
 ```
+</details>
 
-A copy is in [`examples/mcp.json`](./examples/mcp.json).
+<details>
+<summary><b>Claude Code (plugin + slash commands)</b></summary>
 
-### Claude Code (plugin)
-This repo also ships as a Claude Code plugin that bundles the server plus
-convenience slash commands (see below):
+This repo doubles as a Claude Code plugin:
 
 ```
 /plugin marketplace add https://github.com/prime-company/stash-management-mcp
 /plugin install stash@stash-management
 ```
 
-Then run `/mcp` → **stash** → **Authenticate** to authorize in your browser.
+Then run `/mcp` → **stash** → **Authenticate**. Adds the slash commands listed [below](#claude-code-slash-commands).
+</details>
 
-### Any other MCP client
-Point it at `https://www.stashmanagement.com/api/mcp`. Clients that support MCP
-OAuth discover the authorization server from the `.well-known` metadata
-automatically. Headless / terminal clients can use the device-code flow — enter
-the one-time code shown by the client at
-<https://www.stashmanagement.com/activate>.
+<details>
+<summary><b>Any other MCP client</b></summary>
 
-## Tools
+Point it at `https://www.stashmanagement.com/api/mcp`. Clients that support MCP OAuth discover the authorization server from the `.well-known` metadata automatically. Headless / terminal clients can use the RFC 8628 device-code flow — enter the one-time code at [stashmanagement.com/activate](https://www.stashmanagement.com/activate).
+</details>
+
+## Server reference
+
+| | |
+|---|---|
+| **MCP endpoint** | `https://www.stashmanagement.com/api/mcp` |
+| **Transport** | Streamable HTTP |
+| **Auth** | OAuth 2.0 — authorization code + PKCE (browser), or RFC 8628 device code (headless) |
+| **Discovery** | `/.well-known/oauth-protected-resource` · `/.well-known/oauth-authorization-server` |
+| **Manage / revoke** | [stashmanagement.com/settings/connections](https://www.stashmanagement.com/settings/connections) |
+
+### Tools
 
 Read tools — granted by default (`inventory:read`):
 
@@ -79,7 +114,7 @@ Read tools — granted by default (`inventory:read`):
 | `list_recent_items` | Recently added or updated items |
 | `list_keys` | Major / minor key issues |
 | `list_top_items_by_value` | Top items by value or unrealized gain |
-| `get_collection_stats` | Total count, cost, value, P/L |
+| `get_collection_stats` | Total count, cost, value, profit/loss |
 | `get_publisher_breakdown` | Items grouped by publisher |
 | `get_recent_activity` | Recent actions in your workspace |
 
@@ -94,14 +129,11 @@ Write / action tools — require consent (`inventory:write`, `actions:trigger`):
 | `export_inventory_csv` | `actions:trigger` | Export inventory to a CSV (signed URL) |
 | `bulk_enrich` | `actions:trigger` | Enrich items with covers / metadata |
 
-Every tool ships a JSON-Schema `outputSchema` and behavior annotations
-(`readOnlyHint` / `openWorldHint` / `destructiveHint`) per the MCP spec, so
-assistants understand results and know which calls are safe.
+Every tool ships a JSON-Schema `outputSchema` and behavior annotations (`readOnlyHint` / `openWorldHint` / `destructiveHint`) per the MCP spec, so assistants understand results and know which calls are safe.
 
-## Claude Code slash commands
+### Claude Code slash commands
 
-When installed as the Claude Code plugin, these convenience commands wrap the
-tools (write commands preview with a dry-run and ask before committing):
+Installed via the Claude Code plugin, these wrap the tools (write commands preview with a dry-run and ask before committing):
 
 | Command | What it does |
 |---|---|
@@ -116,14 +148,16 @@ tools (write commands preview with a dry-run and ask before committing):
 | `/stash-publishers` | Breakdown by publisher |
 | `/stash-sync-prices <id-or-query>` | Refresh market price for an item |
 
-## Requirements
+---
 
-A Stash Management account. AI access is included on paid plans (Collector and
-up). Free accounts can install the connector, but tool calls return an upgrade
-prompt.
+<div align="center">
 
-## Development
+### Don't have a collection in Stash yet?
 
-The connector/plugin source lives in the `stash-management` monorepo under
-`scripts/stash-plugin/` and is mirrored to this repo. To publish an update, sync
-that folder to this repo's root over HTTPS and push `main`.
+Scan your first book, get its market value, and start cataloging in seconds.
+
+### 👉 [Start cataloging free →](https://www.stashmanagement.com/login?intent=signup)
+
+[stashmanagement.com](https://www.stashmanagement.com) · [Pricing](https://www.stashmanagement.com/pricing) · [Help](https://www.stashmanagement.com/help/ai-connections)
+
+</div>
