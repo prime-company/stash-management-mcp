@@ -1,77 +1,129 @@
-# Stash Management (Claude Code plugin)
+# Stash Management — MCP connector
 
-Adds the Stash Management MCP server to Claude Code so you can query your
-comic inventory directly: search keys, get collection stats, recap recent
-activity — all from the chat.
+Connect your [Stash Management](https://www.stashmanagement.com) comic-book
+inventory to any AI assistant that speaks the [Model Context
+Protocol](https://modelcontextprotocol.io). Ask about your collection, look up
+values and key issues, and — with your permission — add or update items, all in
+plain English from **ChatGPT, Claude, Cursor, or any MCP-compatible client**.
 
-## Install
+## The server
 
-```
-/plugin marketplace add prime-company/stash-management-mcp
-/plugin install stash
-```
-
-On first tool call, the plugin uses the OAuth 2.0 device-code flow:
-
-1. Claude Code shows you a one-time code like `ABCD-EFGH`
-2. Visit <https://stashmanagement.com/activate> in any browser
-3. Type the code, log in, pick a workspace, click Allow
-4. Claude Code automatically picks up the connection — you stay in the terminal
-
-The two-step pattern (code in terminal + code typed into browser) means
-nobody can phish your authorization — only the session that initiated the
-request can pick up the resulting tokens.
-
-Tokens are stored by Claude Code locally. Revoke anytime at
-<https://stashmanagement.com/settings/connections>.
-
-## What it adds
-
-### Slash commands
-
-| Command | What it does |
+| | |
 |---|---|
-| `/stash-summary` | One-shot collection overview (best first command) |
-| `/stash-search <query>` | Search your inventory |
-| `/stash-stats` | Summarize collection count, value, P/L |
-| `/stash-keys [major]` | List your key issues |
-| `/stash-add <description>` | Add a comic — previews with dry-run, asks to confirm |
-| `/stash-sold <id-or-description> <price>` | Record a sale — previews net gain/loss first |
-| `/stash-export [filters]` | Export inventory to CSV (24h signed URL). Natural-language filters supported. |
-| `/stash-recent [limit]` | Most recently added or updated items |
-| `/stash-publishers` | Collection breakdown by publisher |
-| `/stash-sync-prices <id-or-query>` | Refresh going_rate from CovrPrice (refuses to sync the whole collection at once) |
+| **MCP endpoint** | `https://www.stashmanagement.com/api/mcp` |
+| **Transport** | Streamable HTTP |
+| **Auth** | OAuth 2.0 — authorization code + PKCE (browser), or RFC 8628 device code (headless) |
+| **Discovery** | `/.well-known/oauth-protected-resource` · `/.well-known/oauth-authorization-server` |
 
-### MCP tools (callable by name in any prompt)
+You authorize once in your browser and pick which workspace the assistant may
+access. Access is **read-only by default**; the write tools require explicitly
+granting the `inventory:write` / `actions:trigger` scopes at the consent screen.
+Revoke any connection anytime at
+<https://www.stashmanagement.com/settings/connections>.
+
+## Connect from your AI app
+
+Most clients only need the endpoint URL — they run the OAuth flow for you.
+
+### ChatGPT
+Add a custom connector with the URL
+`https://www.stashmanagement.com/api/mcp`, then click Connect and authorize.
+
+### Claude (Desktop / claude.ai)
+Add a custom connector with the same URL, or grab the one-click installer
+(`.mcpb`) from <https://www.stashmanagement.com/connect>.
+
+### Cursor · VS Code · Windsurf · Cline · other MCP clients
+Add the server to your MCP config (e.g. `mcp.json` or the app's MCP settings):
+
+```json
+{
+  "mcpServers": {
+    "stash": {
+      "type": "http",
+      "url": "https://www.stashmanagement.com/api/mcp"
+    }
+  }
+}
+```
+
+A copy is in [`examples/mcp.json`](./examples/mcp.json).
+
+### Claude Code (plugin)
+This repo also ships as a Claude Code plugin that bundles the server plus
+convenience slash commands (see below):
+
+```
+/plugin marketplace add https://github.com/prime-company/stash-management-mcp
+/plugin install stash@stash-management
+```
+
+Then run `/mcp` → **stash** → **Authenticate** to authorize in your browser.
+
+### Any other MCP client
+Point it at `https://www.stashmanagement.com/api/mcp`. Clients that support MCP
+OAuth discover the authorization server from the `.well-known` metadata
+automatically. Headless / terminal clients can use the device-code flow — enter
+the one-time code shown by the client at
+<https://www.stashmanagement.com/activate>.
+
+## Tools
+
+Read tools — granted by default (`inventory:read`):
 
 | Tool | Description |
 |---|---|
+| `get_inventory_summary` | One-shot collection overview (best first call) |
 | `search_inventory` | Full-text search across your inventory |
 | `get_inventory_item` | Fetch a single item by id |
 | `list_recent_items` | Recently added or updated items |
 | `list_keys` | Major / minor key issues |
-| `list_top_items_by_value` | Top items by going rate or unrealized gain |
+| `list_top_items_by_value` | Top items by value or unrealized gain |
 | `get_collection_stats` | Total count, cost, value, P/L |
 | `get_publisher_breakdown` | Items grouped by publisher |
 | `get_recent_activity` | Recent actions in your workspace |
-| `add_inventory_item` | Create a new comic (dry-run by default in slash commands) |
-| `update_inventory_item` | Partial update by id |
-| `mark_item_sold` | Record a sale; dry-run shows net gain/loss |
-| `sync_price_for_item` | Refresh going_rate from CovrPrice |
-| `export_inventory_csv` | Download a CSV (signed URL, 24h expiry) |
+
+Write / action tools — require consent (`inventory:write`, `actions:trigger`):
+
+| Tool | Scope | Description |
+|---|---|---|
+| `add_inventory_item` | `inventory:write` | Create a new comic |
+| `update_inventory_item` | `inventory:write` | Update an item by id |
+| `mark_item_sold` | `inventory:write` | Record a sale |
+| `sync_price_for_item` | `inventory:write` | Refresh market price from external sources |
+| `export_inventory_csv` | `actions:trigger` | Export inventory to a CSV (signed URL) |
+| `bulk_enrich` | `actions:trigger` | Enrich items with covers / metadata |
+
+Every tool ships a JSON-Schema `outputSchema` and behavior annotations
+(`readOnlyHint` / `openWorldHint` / `destructiveHint`) per the MCP spec, so
+assistants understand results and know which calls are safe.
+
+## Claude Code slash commands
+
+When installed as the Claude Code plugin, these convenience commands wrap the
+tools (write commands preview with a dry-run and ask before committing):
+
+| Command | What it does |
+|---|---|
+| `/stash-summary` | One-shot collection overview |
+| `/stash-search <query>` | Search your inventory |
+| `/stash-stats` | Count, value, and profit/loss |
+| `/stash-keys [major]` | List your key issues |
+| `/stash-add <description>` | Add a comic (dry-run, then confirm) |
+| `/stash-sold <id-or-description> <price>` | Record a sale (previews net gain/loss) |
+| `/stash-export [filters]` | Export to CSV (natural-language filters) |
+| `/stash-recent [limit]` | Most recently added / updated items |
+| `/stash-publishers` | Breakdown by publisher |
+| `/stash-sync-prices <id-or-query>` | Refresh market price for an item |
 
 ## Requirements
 
-- Claude Code 1.0+
-- A Stash Management account on the Collector plan or higher
+A Stash Management account. AI access is included on paid plans (Collector and
+up). Free accounts can install the connector, but tool calls return an upgrade
+prompt.
 
-## Publishing
+## Development
 
-This folder is the source of truth in the `stash-management` monorepo. To
-publish, mirror it to its own repo at `stashmanagement/stash-plugin` (the
-marketplace looks up plugins by `owner/repo`).
-
-```
-# from the monorepo root
-git subtree push --prefix=scripts/stash-plugin git@github.com:prime-company/stash-management-mcp.git main
-```
+The connector/plugin source lives in the `stash-management` monorepo under
+`scripts/stash-plugin/` and is mirrored to this repo. To publish an update, sync
+that folder to this repo's root over HTTPS and push `main`.
