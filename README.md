@@ -1,4 +1,4 @@
-# stash (Claude Code plugin)
+# Stash Management (Claude Code plugin)
 
 Adds the Stash Management MCP server to Claude Code so you can query your
 comic inventory directly: search keys, get collection stats, recap recent
