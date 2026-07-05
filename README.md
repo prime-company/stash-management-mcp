@@ -7,8 +7,6 @@
 **Catalog comics at the speed of a scan** — now bring your collection into your AI assistant.
 
 [![Start cataloging free](https://img.shields.io/badge/Start_cataloging-free-EA580C?style=for-the-badge)](https://www.stashmanagement.com/login?intent=signup)
-[![Website](https://img.shields.io/badge/stashmanagement.com-111111?style=for-the-badge)](https://www.stashmanagement.com)
-[![Protocol: MCP](https://img.shields.io/badge/protocol-MCP-6E56CF?style=for-the-badge)](https://modelcontextprotocol.io)
 
 </div>
 
@@ -21,8 +19,6 @@
 This connector is how you bring that collection into any AI assistant. So step one is an account — **it's free to start**:
 
 ### 👉 [Create your free account →](https://www.stashmanagement.com/login?intent=signup)
-
-> AI assistant access is included on paid plans (**Collector** and up). Free accounts can install the connector to try it, but tool calls return an upgrade prompt. See [pricing](https://www.stashmanagement.com/pricing).
 
 Already have an account? Skip to [**Connect your AI app**](#3--connect-your-ai-app).
 
