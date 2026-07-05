@@ -2,19 +2,16 @@
   "name": "stash",
   "version": "0.1.0",
   "description": "Query your comic book inventory from Claude Code. Adds a Stash Management MCP server with read tools (search inventory, get stats, list keys) plus convenience slash commands.",
-  "author": "Stash Management",
-  "homepage": "https://stashmanagement.com/connect",
+  "author": {
+    "name": "Stash Management"
+  },
+  "homepage": "https://www.stashmanagement.com/connect",
   "repository": "https://github.com/prime-company/stash-management-mcp",
   "license": "MIT",
   "mcpServers": {
     "stash": {
       "type": "http",
-      "url": "https://stashmanagement.com/api/mcp",
-      "description": "Stash Management — comic inventory + collection stats",
-      "auth": {
-        "preferred_flow": "device_code",
-        "$comment": "Claude Code is a terminal app, so the device-code flow gives a better UX than the authorization-code flow's redirect handling. The MCP client will hit /api/oauth/device/code, display the user_code, and poll /api/oauth/token until the user approves at /activate."
-      }
+      "url": "https://www.stashmanagement.com/api/mcp"
     }
   }
 }

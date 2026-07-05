@@ -1,0 +1,19 @@
+{
+  "name": "stash-management",
+  "owner": {
+    "name": "Stash Management",
+    "email": "support@stashmanagement.com"
+  },
+  "description": "Stash Management — query your comic inventory from Claude Code.",
+  "plugins": [
+    {
+      "name": "stash",
+      "source": "./",
+      "description": "Stash Management MCP server (read tools) plus convenience slash commands.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Stash Management"
+      }
+    }
+  ]
+}

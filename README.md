@@ -68,7 +68,8 @@ Tokens are stored by Claude Code locally. Revoke anytime at
 ## Publishing
 
 This folder is the source of truth in the `stash-management` monorepo. To
-publish updates, mirror it to this repo:
+publish, mirror it to its own repo at `stashmanagement/stash-plugin` (the
+marketplace looks up plugins by `owner/repo`).
 
 ```
 # from the monorepo root
