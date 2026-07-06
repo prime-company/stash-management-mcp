@@ -1,0 +1,31 @@
+name: Close stale issues
+
+# Auto-close issues with no activity. Bugs and high-priority items are exempt so
+# real problems don't get swept away. Free on public repos.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 45
+          days-before-close: 14
+          stale-issue-label: stale
+          stale-issue-message: >
+            This issue has had no activity for 45 days and will be closed in 14
+            days if nothing further happens. Comment to keep it open.
+          close-issue-message: >
+            Closing due to inactivity — comment to reopen anytime.
+          exempt-issue-labels: "bug,pinned,security,priority: high"
+          # This repo is a read-only mirror; PRs aren't accepted, so skip them.
+          days-before-pr-stale: -1
+          days-before-pr-close: -1

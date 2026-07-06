@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Setup & usage help
+    url: https://www.stashmanagement.com/help/ai-connections
+    about: How to connect ChatGPT/Claude/Cursor, tools, scopes, and troubleshooting.
+  - name: 🔌 Manage or revoke a connection
+    url: https://www.stashmanagement.com/settings/connections
+    about: See and revoke which AI apps have access to your workspace.
+  - name: 🆕 Don't have an account yet?
+    url: https://www.stashmanagement.com/login?intent=signup
+    about: Create a free Stash Management account to get started.

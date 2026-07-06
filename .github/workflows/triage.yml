@@ -1,0 +1,51 @@
+name: Issue triage
+
+# Rule-based triage for new issues (no AI, no API key, free on public repos).
+# The issue forms already apply a category label (bug/question/enhancement);
+# this adds a light keyword label and an auto-acknowledge comment so reporters
+# get an immediate response and a pointer to the docs.
+#
+# To upgrade to AI triage later (classify + prioritize + spam-flag via free
+# GitHub Models), swap this job for an `actions/ai-inference` step — see the
+# project notes.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  acknowledge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const text = (
+              (context.payload.issue.title || "") + " " +
+              (context.payload.issue.body || "")
+            ).toLowerCase();
+
+            // Light keyword labels (forms already set bug/question/enhancement).
+            const add = [];
+            if (/(401|unauthor|reauth|\btoken\b|oauth|\blog ?in\b|\bconnect|authoriz|consent)/.test(text)) {
+              add.push("auth");
+            }
+            if (add.length) {
+              try { await github.rest.issues.addLabels({ owner, repo, issue_number, labels: add }); }
+              catch (e) { core.warning("label add failed: " + e.message); }
+            }
+
+            await github.rest.issues.createComment({
+              owner, repo, issue_number,
+              body: [
+                "Thanks for opening this — a maintainer will take a look.",
+                "",
+                "Most setup and usage questions are answered in the docs: https://www.stashmanagement.com/help/ai-connections",
+                "You can manage or revoke AI connections at https://www.stashmanagement.com/settings/connections",
+              ].join("\n"),
+            });
